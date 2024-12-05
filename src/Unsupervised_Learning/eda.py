@@ -4,7 +4,7 @@ import pandas as pd
 import seaborn as sns
 from scipy.stats import zscore
 import warnings
-
+from sklearn.metrics import davies_bouldin_score, silhouette_score
 from sklearn.cluster import KMeans
 from sklearn.discriminant_analysis import StandardScaler
 
@@ -17,6 +17,20 @@ def eda_analysis(pokemon_data):
     # Colonne numeriche
     stats_columns = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed", "Total"]
     numeric_data = pokemon_data[stats_columns]
+
+    # Controllo valori mancanti
+    missing_values = pokemon_data.isnull().sum()
+    print("Valori mancanti per colonna:")
+    print(missing_values[missing_values > 0])
+
+    # Distribuzione delle variabili categoriali
+    categorical_columns = ["Type 1", "Type 2", "Legendary"]
+    for column in categorical_columns:
+        plt.figure(figsize=(8, 5))
+        sns.countplot(data=pokemon_data, x=column, order=pokemon_data[column].value_counts().index, palette="viridis")
+        plt.title(f"Distribuzione della variabile '{column}'")
+        plt.xticks(rotation=45)
+        plt.show()
 
     # 1. Heatmap delle correlazioni
     plt.figure(figsize=(10, 8))
@@ -57,25 +71,37 @@ def eda_analysis(pokemon_data):
             print(f"\n{column} vs Total Group")
             print(pokemon_data.groupby('Total_Group')[column].describe())
     
-    # 7. Metodo del gomito per trovare il numero ottimale di cluster
-    Skills = [ 'HP', 'Attack', 'Defense','Sp. Atk', 'Sp. Def', 'Speed']
+    # 7. metodo del gomito e Silhouette Score
     scale = StandardScaler()
-    StdScale = scale.fit_transform(pokemon_data[Skills])
-    n_max_clusters = 15
-    score = []
-    for cluster in range(1,n_max_clusters):
-        kmeans_f = KMeans(n_clusters = cluster, init="k-means++", random_state=10)
-        kmeans_f.fit(StdScale)
-        score.append(kmeans_f.inertia_)      
-    plt.plot(range(1,n_max_clusters), score)
-    plt.scatter(range(1,n_max_clusters), score)
+    skills = stats_columns  # Assuming you want to use the stats_columns for clustering
+    scaled_data = scale.fit_transform(pokemon_data[skills])
+    inertias = []
+    silhouette_scores = []
+    max_clusters = 10  # Define the maximum number of clusters
 
-    plt.title('The Elbow Chart')
-    plt.xlabel('number of clusters')
-    plt.ylabel('Inertia')
-    n = 5
-    plt.annotate(f"Number of clusters = {n}", xy=(n, score[n]), xytext=(n-3, score[n]*0.8), arrowprops=dict(arrowstyle="->"))
+    for k in range(2, max_clusters):  # Il Silhouette Score non è definito per k=1
+        kmeans = KMeans(n_clusters=k, init="k-means++", random_state=10)        
+        kmeans.fit(scaled_data)
+        inertias.append(kmeans.inertia_)
+        silhouette_scores.append(silhouette_score(scaled_data, kmeans.labels_))    
+        
+    fig, ax1 = plt.subplots(figsize=(10, 6))
+    ax1.plot(range(2, max_clusters), inertias, 'b-o', label="Inertia (Metodo del gomito)")
+    ax1.set_xlabel("Numero di cluster")
+    ax1.set_ylabel("Inertia", color="b")
+    ax1.tick_params(axis="y", labelcolor="b")
+    ax1.set_title("Metodo del Gomito e Silhouette Score")
+
+    ax2 = ax1.twinx()
+    ax2.plot(range(2, max_clusters), silhouette_scores, 'r-o', label="Silhouette Score")
+    ax2.set_ylabel("Silhouette Score", color="r")
+    ax2.tick_params(axis="y", labelcolor="r")
+
+    fig.tight_layout()
+    plt.legend(loc="upper left")
     plt.show()
+
+
 
 
 

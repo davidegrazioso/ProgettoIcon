@@ -17,23 +17,35 @@ def closest():
     scaler = StandardScaler()
     scaled_data = scaler.fit_transform(numeric_data)
 
+    # Funzione per ottenere input numerici validi
+    def get_valid_input(prompt):
+        while True:
+            try:
+                value = float(input(prompt))
+                if 1 <= value <= 255:
+                    return value
+                else:
+                    print("Il valore deve essere compreso tra 1 e 255.")
+            except ValueError:
+                print("Per favore, inserisci un numero valido.")
+
     # Input delle statistiche da parte dell'utente
     nome = input("Inserisci il nome del Pokémon: ")
     print("Inserisci le statistiche del Pokémon:")
     user_stats = {
-        "HP": float(input("HP: ")),
-        "Attack": float(input("Attack: ")),
-        "Defense": float(input("Defense: ")),
-        "Sp. Atk": float(input("Sp. Atk: ")),
-        "Sp. Def": float(input("Sp. Def: ")),
-        "Speed": float(input("Speed: ")),
+        "HP": get_valid_input("HP: "),
+        "Attack": get_valid_input("Attack: "),
+        "Defense": get_valid_input("Defense: "),
+        "Sp. Atk": get_valid_input("Sp. Atk: "),
+        "Sp. Def": get_valid_input("Sp. Def: "),
+        "Speed": get_valid_input("Speed: "),
     }
     user_stats["Total"] = sum(user_stats.values())
     user_stats_values = np.array(list(user_stats.values())).reshape(1, -1)
     user_stats_scaled = scaler.transform(user_stats_values)
 
-    # Ridurre il numero di cluster a 10 (o altro numero ragionevole)
-    kmeans = KMeans(n_clusters=10, random_state=42, n_init=10)
+    # Ridurre il numero di cluster a 4 (numero ideLe per il nostro caso secondo il metodo del gomito e silhouette score)
+    kmeans = KMeans(n_clusters=4, random_state=42, n_init=10)
     kmeans.fit(scaled_data)
 
     # Identificazione del cluster delle statistiche dell'utente
@@ -60,4 +72,3 @@ def closest():
 
 if __name__ == "__main__":
     closest()
-
