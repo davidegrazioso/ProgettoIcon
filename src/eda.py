@@ -81,5 +81,5 @@ def eda_analysis(pokemon_data):
 
 # Esempio di utilizzo
 if __name__ == "__main__":
-    pokemon_data = pd.read_csv('src/Pokemon.csv')
+    pokemon_data = pd.read_csv('datasets/Pokemon.csv')
     eda_analysis(pokemon_data)

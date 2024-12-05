@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 def closest():
     # Caricamento del dataset dei Pokémon da un file CSV
-    pokemon_data = pd.read_csv('src/Pokemon.csv')
+    pokemon_data = pd.read_csv('datasets/Pokemon.csv')
     # Selezione delle colonne numeriche
     stats_columns = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed", "Total"]
     numeric_data = pokemon_data[stats_columns]

@@ -26,7 +26,7 @@ from sklearn.model_selection import GridSearchCV
 from sklearn import metrics
 
 # # Import Dataset
-pokemon = pd.read_csv('src/Pokemon.csv')
+pokemon = pd.read_csv('datasets/Pokemon.csv')
 #######print("The number of sample in dataset is {}.".format(pokemon.shape[0]))
 
 #######pokemon.head()
@@ -96,8 +96,8 @@ log = LogisticRegression()
 log.fit(x_train_scaled,y_train)
 
 log_pred = log.predict(x_test_scaled)
-#######print('Logistic Regression Classifier Accuracy Score: ',accuracy_score(y_test,log_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,log_pred))
+#####print('Logistic Regression Classifier Accuracy Score: ',accuracy_score(y_test,log_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,log_pred))
 
 # Based on the classification report from logistic regression, it can be concluded that Legendary precision is 0.98, recall is 0.98, and F1 score is 0.98. For non-Legendary the precision is 0.77, recall is 0.77, and F1 score is 0.77. The accuracy of the Logistic Regression model is 96.25%. This means that the model successfully predicted the class correctly for 96.25% of all data used for evaluation.
 confusion_matrix = metrics.confusion_matrix(y_test,log_pred)
@@ -108,8 +108,8 @@ metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labe
 dtree= tree.DecisionTreeClassifier()
 dtree.fit(x_train_scaled,y_train)
 dtree_pred = dtree.predict(x_test_scaled)
-#######print('Decision Tree Classifier Accuracy Score: ',accuracy_score(y_test,dtree_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,dtree_pred))
+#####print('Decision Tree Classifier Accuracy Score: ',accuracy_score(y_test,dtree_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,dtree_pred))
 
 # Based on the classification report from decicion tree, it can be concluded that Legendary precision is 0.98, recall is 0.95, and F1 score is 0.97. For non-Legendary the precision is 0.59, recall is 0.77, and F1 score is 0.67. The accuracy of the decision tree model is 93.75%.
 confusion_matrix = metrics.confusion_matrix(y_test,dtree_pred)
@@ -121,8 +121,8 @@ rf = RandomForestClassifier()
 rf.fit(x_train_scaled,y_train)
 
 rf_pred = rf.predict(x_test_scaled)
-#######print('Random Forest Classifier Accuracy Score: ',accuracy_score(y_test,rf_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,rf_pred))
+#####print('Random Forest Classifier Accuracy Score: ',accuracy_score(y_test,rf_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,rf_pred))
 
 # Based on the classification report from random forest, it can be concluded that Legendary precision is 0.97, recall is 0.97, and F1 score is 0.97. For non-Legendary the precision is 0.69, recall is 0.69, and F1 score is 0.69. The accuracy of the random forest model is 95%.
 confusion_matrix = metrics.confusion_matrix(y_test,rf_pred)
@@ -134,8 +134,8 @@ nb = GaussianNB()
 nb.fit(x_train_scaled,y_train)
 
 nb_pred = nb.predict(x_test_scaled)
-#######print('Naive Bayes Classifier Accuracy Score: ',accuracy_score(y_test,nb_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,nb_pred))
+#####print('Naive Bayes Classifier Accuracy Score: ',accuracy_score(y_test,nb_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,nb_pred))
 
 # Based on the classification report from naive bayes, it can be concluded that Legendary precision is 0.97, recall is 0.24, and F1 score is 0.39. For non-Legendary the precision is 0.10, recall is 0.92, and F1 score is 0.18. The accuracy of the random forest model is 30%, indicating that the model may not work well or there are problems that need to be fixed.
 confusion_matrix = metrics.confusion_matrix(y_test,nb_pred)
@@ -148,8 +148,8 @@ knn = KNeighborsClassifier(n_neighbors=k)
 
 knn.fit(x_train_scaled,y_train)
 knn_pred = knn.predict(x_test_scaled)
-#######print('KNN Classifier Accuracy Score: ',accuracy_score(y_test,knn_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,knn_pred))
+#####print('KNN Classifier Accuracy Score: ',accuracy_score(y_test,knn_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,knn_pred))
 # Based on the classification report from KNN, it can be concluded that Legendary precision is 0.93, recall is 1.00, and F1 score is 0.96. For non-Legendary the precision is 1.00, recall is 0.15, and F1 score is 0.27. The accuracy of the KNN model is 93.125%.
 confusion_matrix = metrics.confusion_matrix(y_test,nb_pred)
 metrics.ConfusionMatrixDisplay(confusion_matrix = confusion_matrix, display_labels = [0,1]).plot()
@@ -160,8 +160,8 @@ svm = SVC()
 svm.fit(x_train_scaled,y_train)
 
 svm_pred = svm.predict(x_test_scaled)
-#######print('SVM Classifier Accuracy Score: ',accuracy_score(y_test,svm_pred)*100)
-#######print("Classification Report:\n", classification_report(y_test,svm_pred))
+#####print('SVM Classifier Accuracy Score: ',accuracy_score(y_test,svm_pred)*100)
+#####print("Classification Report:\n", classification_report(y_test,svm_pred))
 
 # Based on the classification report from SVM, it can be concluded that Legendary precision is 0.94, recall is 0.98, and F1 score is 0.96. For non-Legendary the precision is 0.57, recall is 0.31, and F1 score is 0.40. The accuracy of the KNN model is 92.5%.
 confusion_matrix = metrics.confusion_matrix(y_test,svm_pred)
@@ -255,7 +255,7 @@ def leggendario():
     nuovo_pokemon_scaled = scaler.transform(nuovo_pokemon_df)
 
     # Previsione con il modello random forest
-    predizione = rf.predict(nuovo_pokemon_scaled)
+    predizione = dtree.predict(nuovo_pokemon_scaled)
     print("\nIl Pokémon è leggendario!" if predizione[0] == 1 else "\nIl Pokémon non è leggendario.")
 
 if __name__ == "__main__":
