@@ -1,111 +1,203 @@
-import matplotlib.pyplot as plt
-import numpy as np
+# Importare le librerie necessarie
 import pandas as pd
+import matplotlib.pyplot as plt
 import seaborn as sns
-from scipy.stats import zscore
-import warnings
-from sklearn.metrics import davies_bouldin_score, silhouette_score
+
+# Caricamento del dataset
+
+df = pd.read_csv('datasets/dataset.csv', sep='\t')
+
+# 1. Esplorazione dei dati
+# Dimensioni del dataset
+print(f"Dimensioni del dataset: {df.shape}")
+
+# Tipi di dati
+print("\nTipi di dati:")
+print(df.dtypes)
+
+# Controllo dei valori nulli
+print("\nValori nulli:")
+print(df.isnull().sum())
+
+# 2. Analisi delle variabili
+# Statistiche descrittive per variabili numeriche
+print("\nStatistiche descrittive:")
+print(df.describe())
+
+# Distribuzione dei tipi di Pokémon
+print("\nDistribuzione dei tipi di Pokémon:")
+print(df['Type'].value_counts())
+
+# Distribuzione dei Pokémon per generazione
+print("\nDistribuzione per generazione:")
+print(df['Generation'].value_counts())
+
+# Pokémon leggendari
+print("\nNumero di Pokémon leggendari:")
+print(df['Legendary'].value_counts())
+
+# 3. Analisi statistica
+# Selezione delle colonne numeriche
+numeric_columns = df.select_dtypes(include=['float64', 'int64'])
+
+# Matrice di correlazione
+correlation_matrix = numeric_columns.corr()
+
+# Visualizzazione della matrice
+print("\nMatrice di correlazione:")
+print(correlation_matrix)
+
+
+# 4. Visualizzazioni
+# Configurazione grafici
+sns.set(style="whitegrid")
+
+# Distribuzione del punteggio totale
+plt.figure(figsize=(10, 6))
+sns.histplot(df['Total'], bins=20, kde=True, color='blue')
+plt.title("Distribuzione del punteggio totale")
+plt.xlabel("Total")
+plt.ylabel("Frequenza")
+plt.show()
+
+# Percentuale di vittorie vs. Totale
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='Total', y='POURCENTAGE_DE_VICTOIRE', data=df, hue='Legendary', palette='viridis', alpha=0.7)
+plt.title("Percentuale di vittorie vs. Totale")
+plt.xlabel("Total")
+plt.ylabel("Percentuale di vittorie")
+plt.legend(title="Legendary")
+plt.show()
+
+# Numero di combattimenti vs. Percentuale di vittorie
+plt.figure(figsize=(10, 6))
+sns.scatterplot(x='NBR_COMBATS', y='POURCENTAGE_DE_VICTOIRE', data=df, alpha=0.7)
+plt.title("Numero di combattimenti vs. Percentuale di vittorie")
+plt.xlabel("Numero di combattimenti")
+plt.ylabel("Percentuale di vittorie")
+plt.show()
+
+# Distribuzione dei tipi di Pokémon
+plt.figure(figsize=(14, 7))
+sns.countplot(y='Type', data=df, order=df['Type'].value_counts().index, palette='muted')
+plt.title("Distribuzione dei tipi di Pokémon")
+plt.xlabel("Frequenza")
+plt.ylabel("Tipo")
+plt.show()
+
+# Boxplot per Totale per Generazione
+plt.figure(figsize=(12, 6))
+sns.boxplot(x='Generation', y='Total', data=df, palette='coolwarm')
+plt.title("Totale per Generazione")
+plt.xlabel("Generazione")
+plt.ylabel("Totale")
+plt.show()
+
+# Heatmap della matrice di correlazione
+plt.figure(figsize=(12, 10))
+sns.heatmap(correlation_matrix, annot=True, fmt=".2f", cmap='coolwarm', cbar=True)
+plt.title("Mappa di correlazione")
+plt.show()
+
+#metodo del gomito per clusterizzare i dati
 from sklearn.cluster import KMeans
-from sklearn.discriminant_analysis import StandardScaler
+from sklearn.metrics import silhouette_score
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+import pandas as pd
 
-warnings.filterwarnings('ignore')
+# Pre-elaborazione dei dati
+# Selezione delle colonne numeriche e rimozione dei NaN
+numeric_columns = df.select_dtypes(include=['float64', 'int64']).dropna()
 
-def eda_analysis(pokemon_data):
-    """
-    Funzione per effettuare un'analisi esplorativa dei dati.
-    """
-    # Colonne numeriche
-    stats_columns = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed", "Total"]
-    numeric_data = pokemon_data[stats_columns]
+# Standardizzazione dei dati
+scaler = StandardScaler()
+scaled_data = scaler.fit_transform(numeric_columns)
 
-    # Controllo valori mancanti
-    missing_values = pokemon_data.isnull().sum()
-    print("Valori mancanti per colonna:")
-    print(missing_values[missing_values > 0])
+# Metodo del Gomito
+inertia = []
+k_values = range(1, 11)
 
-    # Distribuzione delle variabili categoriali
-    categorical_columns = ["Type 1", "Type 2", "Legendary"]
-    for column in categorical_columns:
-        plt.figure(figsize=(8, 5))
-        sns.countplot(data=pokemon_data, x=column, order=pokemon_data[column].value_counts().index, palette="viridis")
-        plt.title(f"Distribuzione della variabile '{column}'")
-        plt.xticks(rotation=45)
-        plt.show()
+for k in k_values:
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    kmeans.fit(scaled_data)
+    inertia.append(kmeans.inertia_)
 
-    # 1. Heatmap delle correlazioni
-    plt.figure(figsize=(10, 8))
-    correlation_matrix = numeric_data.corr()
-    sns.heatmap(correlation_matrix, annot=True, cmap="coolwarm", fmt=".2f")
-    plt.title("Heatmap delle correlazioni")
+# Visualizzazione del Metodo del Gomito
+plt.figure(figsize=(8, 5))
+plt.plot(k_values, inertia, marker='o', linestyle='--')
+plt.title("Metodo del Gomito")
+plt.xlabel("Numero di Cluster (k)")
+plt.ylabel("Inerzia")
+plt.xticks(k_values)
+plt.grid()
+plt.show()
+
+# Metodo della silhouette
+silhouette_scores = []
+
+for k in range(2, 11):  # L'indice silhouette richiede almeno 2 cluster
+    kmeans = KMeans(n_clusters=k, random_state=42, n_init=10)
+    labels = kmeans.fit_predict(scaled_data)
+    silhouette_scores.append(silhouette_score(scaled_data, labels))
+
+# Visualizzazione della silhouette
+plt.figure(figsize=(8, 5))
+plt.plot(range(2, 11), silhouette_scores, marker='o', linestyle='--', color='orange')
+plt.title("Indice di Silhouette")
+plt.xlabel("Numero di Cluster (k)")
+plt.ylabel("Valore di Silhouette")
+plt.xticks(range(2, 11))
+plt.grid()
+plt.show()
+
+# Scatter plot per le relazioni tra le variabili numeriche
+# Scatter plot per le relazioni tra le variabili numeriche
+plt.figure(figsize=(14, 10))
+sns.pairplot(numeric_columns, diag_kind='kde', corner=True)
+plt.suptitle("Relazioni tra Variabili Numeriche", y=1.02)
+plt.show()
+
+# Boxplot per individuare outliers
+plt.figure(figsize=(14, 8))
+numeric_columns.boxplot()
+plt.title("Boxplot delle Variabili Numeriche (Outliers)")
+plt.ylabel("Valori")
+plt.xticks(rotation=45)
+plt.grid(False)
+plt.show()
+
+# Distribuzione della variabile target
+plt.figure(figsize=(10, 6))
+sns.histplot(df['POURCENTAGE_DE_VICTOIRE'], bins=20, kde=True, color='green')
+plt.title("Distribuzione della Percentuale di Vittorie")
+plt.xlabel("Percentuale di Vittorie")
+plt.ylabel("Frequenza")
+plt.show()
+
+# Distribuzione delle variabili numeriche
+numeric_columns.hist(figsize=(14, 10), bins=20, color='skyblue', edgecolor='black')
+plt.suptitle("Distribuzione delle Variabili Numeriche", y=1.02)
+plt.show()
+
+# Correlazione con la variabile target
+target_corr = correlation_matrix['POURCENTAGE_DE_VICTOIRE'].sort_values(ascending=False)
+
+# Visualizzazione della correlazione
+plt.figure(figsize=(10, 6))
+sns.barplot(x=target_corr.index, y=target_corr.values, palette='coolwarm')
+plt.title("Correlazioni con Percentuale di Vittorie")
+plt.xlabel("Variabili")
+plt.ylabel("Correlazione")
+plt.xticks(rotation=45)
+plt.show()
+
+# Scatter plot per le due variabili più correlate con la target
+most_correlated = target_corr.index[1:3]  # Prime due variabili più correlate
+for col in most_correlated:
+    plt.figure(figsize=(10, 6))
+    sns.scatterplot(data=df, x=col, y='POURCENTAGE_DE_VICTOIRE', alpha=0.7, color='teal')
+    plt.title(f"Relazione tra {col} e Percentuale di Vittorie")
+    plt.xlabel(col)
+    plt.ylabel("Percentuale di Vittorie")
     plt.show()
-
-    # 2. Distribuzioni delle variabili numeriche
-    numeric_data.hist(bins=20, figsize=(15, 10), color='skyblue', edgecolor='black')
-    plt.suptitle("Distribuzioni delle variabili numeriche", fontsize=16)
-    plt.show()
-
-    # 3. Identificazione e visualizzazione degli outlier
-    z_scores = zscore(numeric_data)
-    outliers = (np.abs(z_scores) > 3).any(axis=1)
-    plt.figure(figsize=(15, 10))
-    sns.boxplot(data=numeric_data, palette="Set2", orient="h")
-    plt.title("Boxplot delle variabili numeriche per identificare gli outlier")
-    plt.xlabel("Valori")
-    plt.ylabel("Statistiche")
-    plt.show()
-
-    # 4. Relazioni fra variabili numeriche
-    sns.pairplot(numeric_data, diag_kind="kde", plot_kws={"alpha": 0.6})
-    plt.suptitle("Relazioni fra variabili numeriche", y=1.02)
-    plt.show()
-
-    # 5. Analisi della variabile target (se presente)
-    # Suddividere la colonna 'Total' in intervalli
-    bins = [180, 300, 420, 540, 660, 780]  # Intervalli di 'Total'
-    labels = ['180-300', '301-420', '421-540', '541-660', '661-780']  # Etichette per i gruppi
-    pokemon_data['Total_Group'] = pd.cut(pokemon_data['Total'], bins=bins, labels=labels, right=True)
-
-    # 6. Analisi della variabile target rispetto alle variabili numeriche
-    if 'Total' in pokemon_data.columns:
-        for column in stats_columns:
-            print(f"\n{column} vs Total Group")
-            print(pokemon_data.groupby('Total_Group')[column].describe())
-    
-    # 7. metodo del gomito e Silhouette Score
-    scale = StandardScaler()
-    skills = stats_columns  # Assuming you want to use the stats_columns for clustering
-    scaled_data = scale.fit_transform(pokemon_data[skills])
-    inertias = []
-    silhouette_scores = []
-    max_clusters = 10  # Define the maximum number of clusters
-
-    for k in range(2, max_clusters):  # Il Silhouette Score non è definito per k=1
-        kmeans = KMeans(n_clusters=k, init="k-means++", random_state=10)        
-        kmeans.fit(scaled_data)
-        inertias.append(kmeans.inertia_)
-        silhouette_scores.append(silhouette_score(scaled_data, kmeans.labels_))    
-        
-    fig, ax1 = plt.subplots(figsize=(10, 6))
-    ax1.plot(range(2, max_clusters), inertias, 'b-o', label="Inertia (Metodo del gomito)")
-    ax1.set_xlabel("Numero di cluster")
-    ax1.set_ylabel("Inertia", color="b")
-    ax1.tick_params(axis="y", labelcolor="b")
-    ax1.set_title("Metodo del Gomito e Silhouette Score")
-
-    ax2 = ax1.twinx()
-    ax2.plot(range(2, max_clusters), silhouette_scores, 'r-o', label="Silhouette Score")
-    ax2.set_ylabel("Silhouette Score", color="r")
-    ax2.tick_params(axis="y", labelcolor="r")
-
-    fig.tight_layout()
-    plt.legend(loc="upper left")
-    plt.show()
-
-
-
-
-
-# Esempio di utilizzo
-if __name__ == "__main__":
-    pokemon_data = pd.read_csv('datasets/Pokemon.csv')
-    eda_analysis(pokemon_data)

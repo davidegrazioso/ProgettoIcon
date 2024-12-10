@@ -23,7 +23,7 @@ def predict(name_first_pokemon, name_second_pokemon, pokedex):
         print(f"Error: Pokémon with name '{name_second_pokemon}' not found in the Pokédex")
         return
 
-    predict_model = joblib.load('datasets/battaglia/model_pokemon.mod')
+    predict_model = joblib.load('model_pokemon.mod')
     predict_first_pokemon = predict_model.predict(
         [[first_pokemon[2], first_pokemon[3], first_pokemon[4], first_pokemon[5],
           first_pokemon[6], first_pokemon[7], first_pokemon[8]]])

@@ -8,7 +8,7 @@ warnings.filterwarnings('ignore')
 
 def closest():
     # Caricamento del dataset dei Pokémon da un file CSV
-    pokemon_data = pd.read_csv('datasets/Pokemon.csv')
+    pokemon_data = pd.read_csv('datasets/pokemon_coded.csv')
     # Selezione delle colonne numeriche
     stats_columns = ["HP", "Attack", "Defense", "Sp. Atk", "Sp. Def", "Speed", "Total"]
     numeric_data = pokemon_data[stats_columns]
@@ -30,7 +30,6 @@ def closest():
                 print("Per favore, inserisci un numero valido.")
 
     # Input delle statistiche da parte dell'utente
-    nome = input("Inserisci il nome del Pokémon: ")
     print("Inserisci le statistiche del Pokémon:")
     user_stats = {
         "HP": get_valid_input("HP: "),

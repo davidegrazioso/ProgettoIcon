@@ -16,7 +16,6 @@ pokemon = export_data["pokemon"]
 def leggendario():
     print("\nInserisci i dettagli del Pokémon per predire se è leggendario o no:")
 
-    nome = input("Nome: ")
 
     # Converte i tipi disponibili in minuscolo per un confronto case-insensitive
     tipi_disponibili = [tipo.lower() for tipo in pokemon['Type'].unique()]

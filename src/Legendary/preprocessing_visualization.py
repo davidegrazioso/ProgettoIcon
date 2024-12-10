@@ -9,15 +9,14 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
 import os
-from sklearn.preprocessing import LabelEncoder, StandardScaler
+from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
 from sklearn import tree
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.naive_bayes import GaussianNB
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
-from sklearn.metrics import accuracy_score, classification_report, ConfusionMatrixDisplay
+from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
 
 # Walk through directories to list dataset files
 for dirname, _, filenames in os.walk('/kaggle/input'):
@@ -25,14 +24,10 @@ for dirname, _, filenames in os.walk('/kaggle/input'):
         print(os.path.join(dirname, filename))
 
 # Import Dataset
-pokemon = pd.read_csv('datasets/Pokemon.csv')
+pokemon = pd.read_csv('datasets/pokemon_coded.csv')
 
 print("The number of sample in dataset is {}.".format(pokemon.shape[0]))
 pokemon.head()
-
-# Preprocessing
-pokemon.drop(columns='Type 2', inplace=True)
-pokemon.rename(columns={'Type 1': 'Type'}, inplace=True)
 
 # Visualization
 plt.figure(figsize=(10, 5))
@@ -54,8 +49,7 @@ plt.show()
 
 # Encoding
 pokemon_coded = pd.get_dummies(pokemon, columns=['Type'], drop_first=True)
-encoder = LabelEncoder()
-Y = encoder.fit_transform(pokemon_coded['Legendary'])
+Y = pokemon_coded['Legendary']
 X = pokemon_coded.drop(columns=['Name', 'Legendary'])
 
 # Splitting and Scaling
@@ -64,13 +58,6 @@ scaler = StandardScaler()
 x_train_scaled = scaler.fit_transform(x_train)
 x_test_scaled = scaler.transform(x_test)
 
-# Logistic Regression
-log = LogisticRegression()
-log.fit(x_train_scaled, y_train)
-log_pred = log.predict(x_test_scaled)
-print('Logistic Regression Accuracy:', accuracy_score(y_test, log_pred))
-ConfusionMatrixDisplay.from_predictions(y_test, log_pred).plot()
-plt.show()
 
 # Decision Tree
 dtree = tree.DecisionTreeClassifier()
@@ -112,10 +99,10 @@ print('SVM Accuracy:', accuracy_score(y_test, svm_pred))
 ConfusionMatrixDisplay.from_predictions(y_test, svm_pred).plot()
 plt.show()
 
-# Using the logistic regression model has an accuracy rate of 96.25%, decision tree has an accuracy rate of 93.75%, random forest has an accuracy rate of 93.125%, 
+#  decision tree has an accuracy rate of 93.75%, random forest has an accuracy rate of 93.125%, 
 # naive bayes has an accuracy rate of 30%, KNN has an accuracy rate of 93.125%, and SVM has an accuracy rate of 92.5%. 
 # In this case, using the random forest and KNN methods will have the same accuracy rate of 93.125%. 
-# It can be concluded that using the logistic regression model has the highest accuracy rate of 96.25%.
+# Therefore, the decision tree method is the best method to use in this case.
 
 # Export objects for `leggendario` function
 export_data = {
@@ -126,5 +113,28 @@ export_data = {
 }
 
 import pickle
+from sklearn.metrics import precision_score, recall_score, f1_score, roc_auc_score
 with open('export_data.pkl', 'wb') as file:
     pickle.dump(export_data, file)
+    # Function to evaluate model
+    def evaluate_model(model, x_test, y_test):
+        pred = model.predict(x_test)
+        accuracy = accuracy_score(y_test, pred)
+        precision = precision_score(y_test, pred)
+        recall = recall_score(y_test, pred)
+        f1 = f1_score(y_test, pred)
+        roc_auc = roc_auc_score(y_test, pred)
+        return accuracy, precision, recall, f1, roc_auc
+
+    # Evaluate all models
+    models = {
+        "Decision Tree": dtree,
+        "Random Forest": rf,
+        "Naive Bayes": nb,
+        "KNN": knn,
+        "SVM": svm
+    }
+
+    for model_name, model in models.items():
+        accuracy, precision, recall, f1, roc_auc = evaluate_model(model, x_test_scaled, y_test)
+        print(f"{model_name} - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1 Score: {f1:.4f}, ROC AUC: {roc_auc:.4f}")
