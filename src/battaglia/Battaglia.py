@@ -97,10 +97,6 @@ def evaluate_models(dataset):
             'weights': ['uniform', 'distance'],
             'metric': ['euclidean', 'manhattan']
         }),
-        "Logistic Regression": (LogisticRegression(), {
-            'C': [0.1, 1, 10],
-            'max_iter': [100, 200, 500]
-        })
     }
 
     # Valutare ogni modello
