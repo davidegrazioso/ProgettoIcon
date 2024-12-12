@@ -18,10 +18,8 @@ def setup_data():
     pnd.set_option('mode.chained_assignment', None)
 
     # Dataframe
-    pokemons = pnd.read_csv('datasets/Pokemon.csv', sep=',', encoding='latin-1')
+    pokemons = pnd.read_csv('datasets/pokemon_coded.csv', sep=',', encoding='latin-1')
 
-    # transform legendary column to int
-    pokemons['Legendary'] = (pokemons['Legendary'] == 'True').astype(int)
 
     # load fights
     fights = pnd.read_csv('datasets/combats.csv', sep=',', encoding='latin-1')
