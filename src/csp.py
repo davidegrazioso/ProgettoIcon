@@ -1,61 +1,116 @@
 import pandas as pd
-import warnings
-warnings.filterwarnings('ignore')
-# Caricare il dataset
-data = pd.read_csv("datasets/dataset.csv", sep='\t')
+from constraint import Problem
+import time
+from concurrent.futures import ThreadPoolExecutor
 
-# Chiedere all'utente i parametri
-num_pokemon = int(input("Quanti Pokémon vuoi nel team (2-6)? "))
-while num_pokemon < 2 or num_pokemon > 6:
-    num_pokemon = int(input("Inserisci un numero valido tra 2 e 6: "))
+def partenza():
+    # Caricare il dataset
+    data = pd.read_csv("datasets/dataset.csv", sep='\t')
 
-include_legendary = input("Vuoi includere Pokémon leggendari? (si/no): ").strip().lower()
-while include_legendary not in ["si", "no"]:
-    include_legendary = input("Risposta non valida. Vuoi includere Pokémon leggendari? (si/no): ").strip().lower()
-include_legendary = include_legendary == "si"
+    # Input
+    num_pokemon = 3
 
-print("Inserisci le statistiche da ottimizzare (es. 'HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed')")
+    include_legendary = input("Vuoi includere Pokémon leggendari? (si/no): ").strip().lower() == "si"
 
-def normalize_stat(stat):
-    return stat.strip().lower().title() if stat.lower() != 'hp' else 'HP'
+    print("Inserisci le statistiche da ottimizzare (es. 'HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed')")
 
-stat1 = normalize_stat(input("Inserisci la prima statistica da ottimizzare: "))
-stat2 = normalize_stat(input("Inserisci la seconda statistica da ottimizzare: "))
-stat3 = normalize_stat(input("Inserisci la terza statistica da ottimizzare: "))
+    def normalize_stat(stat):
+        return stat.strip().lower().title() if stat.lower() != 'hp' else 'HP'
 
-# Filtrare il dataset in base alle preferenze dell'utente
-filtered_data = data
-if not include_legendary:
-    filtered_data = filtered_data[filtered_data['Legendary'] == False]
+    valid_stats = ['HP', 'Attack', 'Defense', 'Sp. Atk', 'Sp. Def', 'Speed']
+    stats = []
 
-# Ordinare il dataset per somma delle statistiche selezionate
-filtered_data['Optimized_Stat'] = (
-    filtered_data[stat1] + filtered_data[stat2] + filtered_data[stat3]
-)
-filtered_data = filtered_data.sort_values(by='Optimized_Stat', ascending=False)
+    while len(stats) < 3:
+        stat = normalize_stat(input(f"Inserisci la statistica {len(stats) + 1}: "))
+        if stat not in valid_stats:
+            print("Statistica non valida. Riprova.")
+        elif stat in stats:
+            print("Hai già inserito questa statistica. Riprova.")
+        else:
+            stats.append(stat)
 
-# Selezionare i migliori Pokémon per formare il team
-def create_team(data, num_pokemon):
-    team = []
-    type_counts = {}
+    stat1, stat2, stat3 = stats
 
-    for _, row in data.iterrows():
-        pokemon_type = row['Type']
-        if type_counts.get(pokemon_type, 0) < 2:  # Non più di 2 Pokémon dello stesso tipo
-            team.append(row['Name'])
-            type_counts[pokemon_type] = type_counts.get(pokemon_type, 0) + 1
+    # Filtrare il dataset
+    filtered_data = data.copy()
+    if not include_legendary:
+        filtered_data = filtered_data[filtered_data['Legendary'] == False]
 
-        if len(team) == num_pokemon:
-            break
+    filtered_data['Optimized_Stat'] = (
+        filtered_data[stat1] + filtered_data[stat2] + filtered_data[stat3]
+    )
 
-    return team
+    # Ridurre il dataset ai primi 50 Pokémon più ottimizzati
+    filtered_data = filtered_data.nlargest(50, 'Optimized_Stat')
 
-team = create_team(filtered_data, num_pokemon)
+    # Estrarre i dati necessari
+    pokemon_names = filtered_data['Name'].tolist()
+    pokemon_types = dict(zip(filtered_data['Name'], filtered_data['Type']))
+    pokemon_stats = dict(zip(filtered_data['Name'], filtered_data['Optimized_Stat']))
 
-# Mostrare il team
-if team:
-    print("Il tuo team ottimizzato è:")
-    for pokemon in team:
-        print(pokemon)
-else:
-    print("Non è stato possibile creare un team con i vincoli impostati.")
+    # Configurazione del problema
+    problem = Problem()
+    slots = [f"Slot_{i}" for i in range(num_pokemon)]
+    problem.addVariables(slots, pokemon_names)
+
+    # Vincolo: Tutti i Pokémon nel team devono essere diversi
+    def all_different(*team):
+        return len(set(team)) == len(team)
+
+    problem.addConstraint(all_different, slots)
+
+    # Vincolo: Non più di 2 Pokémon per tipo
+    def max_two_per_type(*team):
+        type_counts = {}
+        for name in team:
+            if name is None:
+                continue
+            pokemon_type = pokemon_types[name]
+            for t in pokemon_type.split('/'):  # Gestione di tipi multipli
+                type_counts[t] = type_counts.get(t, 0) + 1
+                if type_counts[t] > 2:
+                    return False
+        return True
+
+    problem.addConstraint(max_two_per_type, slots)
+
+    # Funzione per calcolare il punteggio di un team
+    def calculate_team_score(team):
+        return sum(pokemon_stats[name] for name in team)
+
+    # Funzione per trovare il team migliore in parallelo
+    def find_best_team_parallel(problem, slots):
+        best_team = None
+        best_score = 0
+
+        def evaluate_solution(solution):
+            nonlocal best_team, best_score
+            team = [solution[slot] for slot in slots]
+            score = calculate_team_score(team)
+            if score > best_score:
+                best_team = team
+                best_score = score
+
+        # Multithreading per esplorare le soluzioni
+        with ThreadPoolExecutor() as executor:
+            futures = [executor.submit(evaluate_solution, solution) for solution in problem.getSolutionIter()]
+            for future in futures:
+                future.result()  # Aspetta la terminazione di tutti i thread
+
+        return best_team, best_score
+
+    # Misurare il tempo di esecuzione
+    start_time = time.time()
+
+    best_team, best_score = find_best_team_parallel(problem, slots)
+
+    end_time = time.time()
+    #print(f"Tempo di calcolo: {end_time - start_time:.2f} secondi")
+
+    # Mostrare il risultato
+    if best_team:
+        print("Il tuo team ottimizzato è:")
+        for pokemon in best_team:
+            print(f"{pokemon} ")
+    else:
+        print("Non è stato possibile trovare una soluzione con i vincoli forniti.")
