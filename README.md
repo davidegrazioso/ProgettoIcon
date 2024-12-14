@@ -1,9 +1,13 @@
 # MANUALE UTENTE
 ---------
 Nome Progetto: PokéJob
+
 $~$
+
 Esecutore: Davide Grazioso 
+
 $~$
+
 Matricola: 758355
 
 ---------
