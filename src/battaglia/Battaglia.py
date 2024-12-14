@@ -12,39 +12,8 @@ import warnings
 warnings.filterwarnings('ignore')
 
 
-# setup data
-def setup_data():
-    pnd.set_option('display.max_columns', None)
-    pnd.set_option('mode.chained_assignment', None)
-
-    # Dataframe
-    pokemons = pnd.read_csv('datasets/pokemon_coded.csv', sep=',', encoding='latin-1')
-
-
-    # load fights
-    fights = pnd.read_csv('datasets/combats.csv', sep=',', encoding='latin-1')
-
-    nbFirstPosition = fights.groupby('First_pokemon').count()
-    nbSecondPosition = fights.groupby('Second_pokemon').count()
-    nbVictories = fights.groupby('Winner').count()
-
-    aggregation = fights.groupby('Winner').count()
-    aggregation.sort_index()
-
-    aggregation['NBR_COMBATS'] = nbFirstPosition.Winner + nbSecondPosition.Winner
-    aggregation['NB_VICTOIRES'] = nbVictories.First_pokemon
-
-    # % of victory
-    aggregation['POURCENTAGE_DE_VICTOIRE'] = nbVictories.First_pokemon / (
-            nbFirstPosition.Winner + nbSecondPosition.Winner)
-
-    newPokedex = pokemons.merge(aggregation, left_on='#', right_index=True, how='left')
-
-    dataset = newPokedex
-    dataset = dataset.dropna(axis=0, how='any')
-    dataset.to_csv('datasets/dataset.csv', sep='\t')
-    return dataset
-
+# Load dataset
+dataset = pnd.read_csv('datasets/dataset.csv', sep='\t', encoding='latin-1')
 
 # train and save model
 def learn_and_save(dataset):
@@ -125,5 +94,5 @@ def evaluate_models(dataset):
         print("===================================")
 
 # setup and train model
-learn_and_save(setup_data())
-evaluate_models(setup_data())
+learn_and_save(dataset)
+evaluate_models(dataset)

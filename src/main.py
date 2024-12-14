@@ -1,5 +1,5 @@
 from Legendary.legendary_function import leggendario
-from Unsupervised_Learning.Closest import closest
+from Closest import closest
 from battaglia.play import sfida
 from csp import partenza
 def main():

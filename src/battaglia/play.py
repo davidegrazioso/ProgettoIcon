@@ -2,16 +2,16 @@ import csv
 import joblib
 
 
-# Search Pokémon information in the Pokédex by name
+# Cerca le informazioni tramite il nome del Pokémon
 def find_pokemon_data_by_name(name, pokedex):
     for pokemon in pokedex:
         if pokemon[1].lower() == name.lower():
             return [pokemon[0], pokemon[1], pokemon[4], pokemon[5], pokemon[6], pokemon[7], pokemon[8],
                     pokemon[9], pokemon[10]]
-    return None  # Return None if the Pokémon is not found
+    return None  # Return None se il pokemon non è stato trovato
 
 
-# Predict victory percentage of Pokémon with trained model
+# predici il risultato della battaglia tra due Pokémon
 def predict(name_first_pokemon, name_second_pokemon, pokedex):
     first_pokemon = find_pokemon_data_by_name(name_first_pokemon, pokedex)
     if not first_pokemon:

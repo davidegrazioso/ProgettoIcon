@@ -1,14 +1,8 @@
-# main_module.py
-# %% [markdown]
-# # **Details on DataSet**
-
-# Importing Libraries
 import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 import warnings
 warnings.filterwarnings('ignore')
-import os
 from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn import tree

@@ -1,6 +1,4 @@
-
 import pandas as pd
-from sklearn.tree import DecisionTreeClassifier
 
 import pickle
 with open('export_data.pkl', 'rb') as file:

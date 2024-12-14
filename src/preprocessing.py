@@ -67,6 +67,7 @@ def evaluate_dataset(dataframe):
     missing_values = dataframe.isnull().sum()
     print(missing_values[missing_values > 0] if missing_values.any() else "Nessun valore mancante")
 
+
 # Esecuzione del preprocessing
 pokemon_coded = preprocess_data()
 
