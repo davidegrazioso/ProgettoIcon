@@ -18,18 +18,13 @@ from sklearn.neighbors import KNeighborsClassifier
 from sklearn.svm import SVC
 from sklearn.metrics import accuracy_score, ConfusionMatrixDisplay
 
-# Walk through directories to list dataset files
-for dirname, _, filenames in os.walk('/kaggle/input'):
-    for filename in filenames:
-        print(os.path.join(dirname, filename))
-
 # Import Dataset
 pokemon = pd.read_csv('datasets/pokemon_coded.csv')
 
 print("The number of sample in dataset is {}.".format(pokemon.shape[0]))
 pokemon.head()
 
-# Visualization
+# visualizzazione grafica e non
 plt.figure(figsize=(10, 5))
 sns.countplot(data=pokemon, y='Type', hue='Legendary', palette='Set2')
 plt.title = "Type with Legendary"
@@ -99,10 +94,7 @@ print('SVM Accuracy:', accuracy_score(y_test, svm_pred))
 ConfusionMatrixDisplay.from_predictions(y_test, svm_pred).plot()
 plt.show()
 
-#  decision tree has an accuracy rate of 93.75%, random forest has an accuracy rate of 93.125%, 
-# naive bayes has an accuracy rate of 30%, KNN has an accuracy rate of 93.125%, and SVM has an accuracy rate of 92.5%. 
-# In this case, using the random forest and KNN methods will have the same accuracy rate of 93.125%. 
-# Therefore, the decision tree method is the best method to use in this case.
+
 
 # Export objects for `leggendario` function
 export_data = {
@@ -138,3 +130,7 @@ with open('export_data.pkl', 'wb') as file:
     for model_name, model in models.items():
         accuracy, precision, recall, f1, roc_auc = evaluate_model(model, x_test_scaled, y_test)
         print(f"{model_name} - Accuracy: {accuracy:.4f}, Precision: {precision:.4f}, Recall: {recall:.4f}, F1 Score: {f1:.4f}, ROC AUC: {roc_auc:.4f}")
+
+# dtree ha un tasso di accuratezza del 93.75%, random forest ha un tasso di accuratezza del 93.125%, 
+# il naive bayes ha un tasso di accuratezza del 30%, KNN ha un tasso di accuratezza del 93.125% e SVM ha un tasso di accuratezza del 92.5%. 
+# modello scelto: Decision Tree

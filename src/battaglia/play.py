@@ -41,7 +41,7 @@ def predict(name_first_pokemon, name_second_pokemon, pokedex):
         print(f"{second_pokemon[1]} è il vincitore!")
 
 def sfida():
-    with open('datasets/Pokemon.csv', newline='') as csvfile:
+    with open('datasets/pokemon_coded.csv', newline='') as csvfile:
         pokedex = list(csv.reader(csvfile))
         pokedex_iter = iter(pokedex)
         next(pokedex_iter)

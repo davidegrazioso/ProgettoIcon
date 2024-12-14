@@ -114,3 +114,6 @@ def partenza():
             print(f"{pokemon} ")
     else:
         print("Non è stato possibile trovare una soluzione con i vincoli forniti.")
+
+if __name__ == "__main__":
+    partenza()
