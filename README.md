@@ -25,11 +25,7 @@ $~$
 
 $~$
 
-<<<<<<< HEAD
-4) Aprire l'intero progetto con qualasiasi IDE (attenzione, non aprire soltanto la cartella src, qualsiasi altra cartella o singolo file, nel caso non doveste aprire tutta la cartella progetto esso non funzionerà)
-=======
-4) Aprire l'intero progetto con qualasiasi idee (attenzione, non aprire soltanto la cartella src, qualsiasi altra cartella o singolo file, nel caso non doveste aprire tutta la cartella progetto esso non funzionerà)
->>>>>>> 56c5573262d317d9e350b1b0b088be356a58d2fa
+4) Aprire l'intero progetto con qualasiasi IDE (attenzione! non aprire soltanto la cartella src, qualsiasi altra cartella o singolo file, nel caso non doveste aprire tutta la cartella progetto esso non funzionerà)
 $~$
 
 5) controllare che nella cartella progetto siano presenti i seguenti file (nel caso non ci fossero si deve andare ad eseguire il file "Battaglia.py" presente in 'src/battaglia' e il file "addestramento.py" presente in 'src/Legendary'):
