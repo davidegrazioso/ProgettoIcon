@@ -25,12 +25,15 @@ $~$
 
 $~$
 
-4) Aprire l'intero progetto con qualasiasi idee (attenzione, non aprire soltanto la cartella src o qualsiasi altra cartella o singolo file, nel caso non doveste aprire tutta la cartella progetto esso non funzionerà)
+4) Aprire l'intero progetto con qualasiasi idee (attenzione, non aprire soltanto la cartella src, qualsiasi altra cartella o singolo file, nel caso non doveste aprire tutta la cartella progetto esso non funzionerà)
 $~$
 
 5) controllare che nella cartella siano presenti i seguenti file (nel caso non ci fossero bisognerebbe andare ad eseguire il file "Battaglia.py" presente in 'src/battaglia' e il file "addestramento.py" presente in 'src/Legendary'):
 $~$
     >  model_pokemon.mod
+    
+    $~$
+   
     >  export_data.pkl <
 
 $~$
