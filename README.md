@@ -43,4 +43,4 @@ $~$
 -------------
 
 ## Esempio di esecuzione
-(![https://imgur.com/B4fFqYE](https://i.imgur.com/B4fFqYE.png))
+![https://imgur.com/B4fFqYE](https://i.imgur.com/B4fFqYE.png)
