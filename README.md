@@ -34,7 +34,7 @@ $~$
     
     $~$
    
-    >  export_data.pkl <
+    >  export_data.pkl 
 
 $~$
 
